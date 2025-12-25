@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sana Özel 💕</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts - Elegant Serif Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'serif': ['Cormorant Garamond', 'serif'],
+                        'display': ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        'blush': '#FFE4EC',
+                        'cream': '#FFF8F0',
+                        'lavender': '#E8E0F0',
+                        'rose': '#FFB6C1',
+                        'dusty-rose': '#D4A5A5',
+                        'soft-purple': '#C9B8D9',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            overflow-x: hidden;
+        }
+
+        /* Lock Screen Styles */
+        .lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #FFE4EC, #FFF8F0, #E8E0F0, #FFD1DC, #F0E6FA);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .lock-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .lock-card {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 25px 50px rgba(219, 166, 180, 0.3);
+            border-radius: 30px;
+            padding: 3rem 2.5rem;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .lock-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            border: 2px solid rgba(212, 165, 165, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            outline: none;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            border-color: #D4A5A5;
+            box-shadow: 0 0 20px rgba(212, 165, 165, 0.3);
+        }
+
+        .password-input.error {
+            border-color: #ff6b6b;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .unlock-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: white;
+            background: linear-gradient(135deg, #D4A5A5, #C9B8D9);
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(212, 165, 165, 0.3);
+        }
+
+        .unlock-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(212, 165, 165, 0.4);
+        }
+
+        .hint-text {
+            margin-top: 1.5rem;
+            color: #888;
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        /* Floating Butterflies */
+        .butterfly-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 90;
+            overflow: hidden;
+        }
+
+        .butterfly {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: butterflyFloat 15s ease-in-out infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes butterflyFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: translateY(50vh) translateX(50px) rotate(15deg);
+            }
+
+            90% {
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: translateY(-10vh) translateX(-30px) rotate(-15deg);
+                opacity: 0;
+            }
+        }
+
+        .butterfly:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+            animation-duration: 18s;
+        }
+
+        .butterfly:nth-child(2) {
+            left: 25%;
+            animation-delay: 3s;
+            animation-duration: 20s;
+        }
+
+        .butterfly:nth-child(3) {
+            left: 40%;
+            animation-delay: 6s;
+            animation-duration: 16s;
+        }
+
+        .butterfly:nth-child(4) {
+            left: 55%;
+            animation-delay: 9s;
+            animation-duration: 22s;
+        }
+
+        .butterfly:nth-child(5) {
+            left: 70%;
+            animation-delay: 12s;
+            animation-duration: 17s;
+        }
+
+        .butterfly:nth-child(6) {
+            left: 85%;
+            animation-delay: 15s;
+            animation-duration: 19s;
+        }
+
+        /* Main content hidden initially */
+        .main-content {
+            opacity: 0;
+            transition: opacity 0.8s ease 0.3s;
+        }
+
+        .main-content.visible {
+            opacity: 1;
+        }
+
+        /* Animated Gradient Background */
+        .gradient-bg {
+            background: linear-gradient(-45deg, #FFE4EC, #FFF8F0, #E8E0F0, #FFD1DC, #F0E6FA);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(219, 166, 180, 0.2);
+        }
+
+        /* Floating Hearts */
+        .floating-heart {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0;
+            font-size: 1.5rem;
+            z-index: 100;
+            animation: floatUp 4s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 0;
+                transform: translateY(0) rotate(0deg) scale(0.5);
+            }
+
+            20% {
+                opacity: 0.8;
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-400px) rotate(45deg) scale(1.2);
+            }
+        }
+
+        /* Sparkle Effect */
+        .sparkle {
+            position: fixed;
+            pointer-events: none;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #FFD700 0%, transparent 70%);
+            border-radius: 50%;
+            animation: sparkleAnim 2s ease-out forwards;
+        }
+
+        @keyframes sparkleAnim {
+            0% {
+                opacity: 0;
+                transform: scale(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.5) translateY(-50px);
+            }
+        }
+
+        /* Bounce Arrow */
+        .bounce-arrow {
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0) translateX(-50%);
+            }
+
+            40% {
+                transform: translateY(-15px) translateX(-50%);
+            }
+
+            60% {
+                transform: translateY(-7px) translateX(-50%);
+            }
+        }
+
+        /* Photo Frame */
+        .photo-frame {
+            background: linear-gradient(135deg, #D4A5A5 0%, #C9B8D9 50%, #FFB6C1 100%);
+            padding: 8px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        .photo-inner {
+            background: white;
+            padding: 6px;
+            border-radius: 12px;
+        }
+
+        /* Counter Style */
+        .counter-box {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .counter-number {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #D4A5A5, #C9B8D9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Love Note Cards */
+        .love-note {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .love-note::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 10px;
+            font-size: 6rem;
+            color: rgba(212, 165, 165, 0.2);
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Butterfly decoration for cards */
+        .butterfly-decor {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.4;
+            animation: gentleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes gentleFloat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(-5deg);
+            }
+
+            50% {
+                transform: translateY(-10px) rotate(5deg);
+            }
+        }
+
+        /* Section Divider */
+        .section-divider {
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #D4A5A5, transparent);
+            margin: 0 auto;
+        }
+
+        /* Butterfly Divider */
+        .butterfly-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .butterfly-divider::before,
+        .butterfly-divider::after {
+            content: '';
+            flex: 1;
+            max-width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 165, 165, 0.5), transparent);
+        }
+
+        /* Letter Box */
+        .letter-paper {
+            background: linear-gradient(180deg, #FFFDF7 0%, #FFF8F0 100%);
+            border: 1px solid rgba(212, 165, 165, 0.3);
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                inset 0 0 100px rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+
+        .letter-paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FFB6C1, #C9B8D9, #FFB6C1);
+        }
+
+        /* Gallery Grid */
+        .gallery-item {
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.7s ease;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .gallery-item:hover::before {
+            left: 100%;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05) rotate(1deg) translateY(-10px);
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.25);
+        }
+
+        .gallery-item img {
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        /* Parallax floating effect */
+        .float-animation {
+            animation: gentleParallax 6s ease-in-out infinite;
+        }
+
+        @keyframes gentleParallax {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        /* Glowing text animation */
+        .glow-text {
+            animation: textGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes textGlow {
+
+            0%,
+            100% {
+                text-shadow: 0 0 10px rgba(212, 165, 165, 0.3);
+            }
+
+            50% {
+                text-shadow: 0 0 25px rgba(212, 165, 165, 0.6), 0 0 40px rgba(201, 184, 217, 0.4);
+            }
+        }
+
+        /* Pulse border animation */
+        .pulse-border {
+            animation: pulseBorder 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseBorder {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(212, 165, 165, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 15px rgba(212, 165, 165, 0);
+            }
+        }
+
+        /* Rotate on scroll animation class */
+        .tilt-card {
+            transition: transform 0.3s ease;
+        }
+
+        .tilt-card:hover {
+            transform: perspective(1000px) rotateX(5deg) rotateY(-5deg);
+        }
+
+        /* Responsive Counter */
+        @media (max-width: 640px) {
+            .counter-box {
+                padding: 0.75rem 1rem;
+                min-width: 60px;
+            }
+
+            .counter-number {
+                font-size: 1.5rem;
+            }
+
+            .lock-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        /* Heart Rain Effect */
+        .heart-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            overflow: hidden;
+        }
+
+        .falling-heart {
+            position: absolute;
+            top: -50px;
+            font-size: 1.2rem;
+            animation: fall linear forwards;
+            opacity: 0.7;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="gradient-bg">
+
+    <!-- Lock Screen -->
+    <div id="lock-screen" class="lock-screen">
+        <div class="lock-card">
+            <div class="lock-icon">🦋</div>
+            <h2 class="font-display text-2xl md:text-3xl text-gray-800 mb-2">Bu sürpriz sadece sana özel</h2>
+            <p class="font-serif text-gray-600 mb-6">Girmek için şifreyi yaz...</p>
+
+            <input type="text" id="password-input" class="password-input" placeholder="Şifre..." autocomplete="off">
+            <p id="error-message" class="error-message">Yanlış şifre, tekrar dene 💕</p>
+
+            <button id="unlock-btn" class="unlock-btn">
+                Kapıyı Aç 💕
+            </button>
+
+            <p class="hint-text">
+                💡 İpucu: Sen kendini biliyorsun...
+            </p>
+        </div>
+    </div>
+
+    <!-- Floating Butterflies -->
+    <div class="butterfly-container" id="butterfly-container">
+        <div class="butterfly">🦋</div>
+        <div class="butterfly">🦋</div>
+        <div class="butterfly">🦋</div>
+        <div class="butterfly">🦋</div>
+        <div class="butterfly">🦋</div>
+        <div class="butterfly">🦋</div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="main-content">
+        <!-- Floating Hearts Container -->
+        <div id="hearts-container"></div>
+
+        <!-- Hero Section -->
+        <section id="hero" class="min-h-screen flex flex-col items-center justify-center px-4 relative">
+            <div class="text-center">
+                <div class="mb-8 opacity-0" id="hero-heart">
+                    <span class="text-6xl md:text-8xl">🦋</span>
+                </div>
+                <h1 class="font-display text-3xl md:text-5xl lg:text-6xl text-gray-800 mb-6 opacity-0 leading-relaxed"
+                    id="hero-title">
+                    Seni bir sürpriz bekliyor...
+                </h1>
+                <p class="font-serif text-xl md:text-2xl text-gray-600 italic opacity-0" id="hero-subtitle">
+                    aşağı kaydır, kelebeğim 🦋
+                </p>
+            </div>
+
+            <!-- Scroll Arrow -->
+            <div class="absolute bottom-12 left-1/2 bounce-arrow opacity-0" id="scroll-arrow">
+                <svg class="w-8 h-8 md:w-10 md:h-10 text-dusty-rose" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M19 14l-7 7m0 0l-7-7m7 7V3">
+                    </path>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Counter Section -->
+        <section id="counter-section" class="min-h-screen flex flex-col items-center justify-center px-4 py-20">
+            <div class="glass-card rounded-3xl p-8 md:p-12 max-w-4xl w-full mx-auto opacity-0 relative"
+                id="counter-card">
+                <div class="butterfly-decor" style="top: 10px; right: 20px;">🦋</div>
+                <div class="butterfly-decor" style="bottom: 10px; left: 20px; animation-delay: 1s;">🦋</div>
+
+                <h2 class="font-display text-2xl md:text-4xl text-gray-800 text-center mb-4 glow-text">
+                    Seninle her saniye çok değerli...
+                </h2>
+                <p class="font-serif text-lg md:text-xl text-gray-600 text-center mb-10 italic float-animation">
+                    21 Haziran 2023'ten bu yana
+                </p>
+
+                <div class="flex flex-wrap justify-center gap-3 md:gap-5">
+                    <div class="counter-box">
+                        <div class="counter-number" id="years">0</div>
+                        <div class="text-sm text-gray-600 font-serif">Yıl</div>
+                    </div>
+                    <div class="counter-box">
+                        <div class="counter-number" id="months">0</div>
+                        <div class="text-sm text-gray-600 font-serif">Ay</div>
+                    </div>
+                    <div class="counter-box">
+                        <div class="counter-number" id="days">0</div>
+                        <div class="text-sm text-gray-600 font-serif">Gün</div>
+                    </div>
+                    <div class="counter-box">
+                        <div class="counter-number" id="hours">0</div>
+                        <div class="text-sm text-gray-600 font-serif">Saat</div>
+                    </div>
+                    <div class="counter-box">
+                        <div class="counter-number" id="minutes">0</div>
+                        <div class="text-sm text-gray-600 font-serif">Dakika</div>
+                    </div>
+                    <div class="counter-box">
+                        <div class="counter-number" id="seconds">0</div>
+                        <div class="text-sm text-gray-600 font-serif">Saniye</div>
+                    </div>
+                </div>
+
+                <div class="section-divider mt-10"></div>
+                <p class="font-serif text-center text-gray-500 mt-6 text-lg italic">
+                    ...ve her bir tanesi seninle geçti 💗
+                </p>
+            </div>
+        </section>
+
+        <!-- Love Story Section -->
+        <section id="story-section" class="py-20 px-4">
+            <!-- Love Note 1 -->
+            <div class="max-w-2xl mx-auto mb-32 opacity-0 love-note-item">
+                <div class="glass-card love-note rounded-2xl p-8 md:p-10 relative tilt-card">
+                    <div class="butterfly-decor" style="top: -10px; right: 20px;">🦋</div>
+                    <p class="font-display text-2xl md:text-3xl text-gray-800 text-center leading-relaxed glow-text">
+                        İyi ki varsın kelebeğim...
+                    </p>
+                    <p class="font-serif text-lg text-gray-600 text-center mt-4 italic">
+                        Hayatıma lisede girdin ve belki de bir ömür boyu seninle geçireceğim.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Butterfly Divider -->
+            <div class="butterfly-divider mb-32 opacity-0 love-note-item">
+                <span class="text-3xl animate-pulse">🦋</span>
+                <span class="text-4xl animate-pulse" style="animation-delay: 0.3s;">💕</span>
+                <span class="text-3xl animate-pulse" style="animation-delay: 0.6s;">🦋</span>
+            </div>
+
+            <!-- Love Note 2 -->
+            <div class="max-w-2xl mx-auto mb-32 opacity-0 love-note-item">
+                <div class="glass-card love-note rounded-2xl p-8 md:p-10 relative">
+                    <div class="butterfly-decor" style="top: -10px; left: 20px;">🦋</div>
+                    <p class="font-display text-2xl md:text-3xl text-gray-800 text-center leading-relaxed">
+                        Gülüşün dünyamı aydınlatıyor
+                    </p>
+                    <p class="font-serif text-lg text-gray-600 text-center mt-4 italic">
+                        Sen gülünce, benim de içim gülüyor.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Love Note 3 -->
+            <div class="max-w-2xl mx-auto mb-32 opacity-0 love-note-item">
+                <div class="glass-card love-note rounded-2xl p-8 md:p-10 relative">
+                    <div class="butterfly-decor" style="bottom: -10px; right: 20px; animation-delay: 0.5s;">🦋</div>
+                    <p class="font-display text-2xl md:text-3xl text-gray-800 text-center leading-relaxed">
+                        Seninle her an bir macera
+                    </p>
+                    <p class="font-serif text-lg text-gray-600 text-center mt-4 italic">
+                        En sıradan günler bile seninle özel.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Sparkles Divider -->
+            <div class="flex justify-center gap-2 mb-32 opacity-0 love-note-item">
+                <span class="text-2xl">✨</span>
+                <span class="text-3xl">🦋</span>
+                <span class="text-2xl">✨</span>
+            </div>
+
+            <!-- Love Note 4 -->
+            <div class="max-w-2xl mx-auto mb-20 opacity-0 love-note-item">
+                <div class="glass-card love-note rounded-2xl p-8 md:p-10 relative">
+                    <div class="butterfly-decor" style="top: -10px; right: 30px;">🦋</div>
+                    <div class="butterfly-decor" style="bottom: -10px; left: 30px; animation-delay: 1.5s;">🦋</div>
+                    <p class="font-display text-2xl md:text-3xl text-gray-800 text-center leading-relaxed">
+                        Seni seviyorum
+                    </p>
+                    <p class="font-serif text-lg text-gray-600 text-center mt-4 italic">
+                        Her gün, her an, sonsuza kadar...
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Photo Gallery Section -->
+        <section id="gallery-section" class="py-20 px-4">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="font-display text-3xl md:text-5xl text-gray-800 text-center mb-6 opacity-0"
+                    id="gallery-title">
+                    En Güzel Anlarımız 🦋
+                </h2>
+                <div class="section-divider mb-16 opacity-0" id="gallery-divider"></div>
+
+                <!-- Photo Grid - All 10 photos -->
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-16">
+                    <div class="photo-frame gallery-item opacity-0 col-span-2 row-span-2">
+                        <div class="photo-inner h-full">
+                            <img src="images/image.png" alt="Bizim anımız"
+                                class="w-full h-full object-cover rounded-lg">
+                        </div>
+                    </div>
+                    <div class="photo-frame gallery-item opacity-0">
+                        <div class="photo-inner">
+                            <img src="images/image1.png" alt="Bizim anımız"
+                                class="w-full h-48 md:h-56 object-cover rounded-lg">
+                        </div>
+                    </div>
+                    <div class="photo-frame gallery-item opacity-0">
+                        <div class="photo-inner">
+                            <img src="images/image3.png" alt="Bizim anımız"
+                                class="w-full h-48 md:h-56 object-cover rounded-lg">
+                        </div>
+                    </div>
+                    <div class="photo-frame gallery-item opacity-0">
+                        <div class="photo-inner">
+                            <img src="images/WhatsApp Image 2025-12-26 at 00.23.23.jpeg" alt="Bizim anımız"
+                                class="w-full h-48 md:h-56 object-cover rounded-lg">
+                        </div>
+                    </div>
+                    <div class="photo-frame gallery-item opacity-0">
+                        <div class="photo-inner">
+                            <img src="images/WhatsApp Image 2025-12-26 at 00.23.57.jpeg" alt="Bizim anımız"
+                                class="w-full h-48 md:h-56 object-cover rounded-lg">
+                        </div>
+                    </div>
+                    <div class="photo-frame gallery-item opacity-0 col-span-2">
+                        <div class="photo-inner">
+                            <img src="images/WhatsApp Image 2025-12-26 at 00.24.22.jpeg" alt="Bizim anımız"
+                                class="w-full h-48 md:h-64 object-cover rounded-lg">
+                        </div>
+                    </div>
+                    <div class="photo-frame gallery-item opacity-0">
+                        <div class="photo-inner">
+                            <img src="images/WhatsApp Image 2025-12-26 at 00.24.54.jpeg" alt="Bizim anımız"
+                                class="w-full h-48 md:h-56 object-cover rounded-lg">
+                        </div>
+                    </div>
+                    <div class="photo-frame gallery-item opacity-0">
+                        <div class="photo-inner">
+                            <img src="images/WhatsApp Image 2025-12-26 at 00.25.16.jpeg" alt="Bizim anımız"
+                                class="w-full h-48 md:h-56 object-cover rounded-lg">
+                        </div>
+                    </div>
+                    <div class="photo-frame gallery-item opacity-0">
+                        <div class="photo-inner">
+                            <img src="images/WhatsApp Image 2025-12-26 at 00.25.50.jpeg" alt="Bizim anımız"
+                                class="w-full h-48 md:h-56 object-cover rounded-lg">
+                        </div>
+                    </div>
+                    <div class="photo-frame gallery-item opacity-0">
+                        <div class="photo-inner">
+                            <img src="images/WhatsApp Image 2025-12-26 at 00.26.32.jpeg" alt="Bizim anımız"
+                                class="w-full h-48 md:h-56 object-cover rounded-lg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Letter Section -->
+        <section id="letter-section" class="py-20 px-4 mb-20">
+            <div class="max-w-3xl mx-auto opacity-0" id="letter-container">
+                <div class="letter-paper rounded-2xl p-8 md:p-12 relative">
+                    <div class="butterfly-decor" style="top: 20px; right: 30px; font-size: 2rem;">🦋</div>
+
+                    <h3 class="font-display text-2xl md:text-3xl text-gray-800 mb-8 text-center">
+                        Sana Mektubum 💌
+                    </h3>
+
+                    <div class="font-serif text-lg md:text-xl text-gray-700 leading-relaxed space-y-6">
+                        <p
+                            class="first-letter:text-5xl first-letter:font-display first-letter:text-dusty-rose first-letter:float-left first-letter:mr-3">
+                            Canım benim, bu küçük sürprizi hazırlarken aklımdan binlerce güzel anımız geçti.
+                            Seninle geçirdiğim her an, hayatımın en değerli hazineleri.
+                        </p>
+
+                        <p>
+                            Sabahları uyandığımda seni düşünmek, geceleri seninle konuşmak...
+                            Basit görünen bu şeyler bile seninle bambaşka, seninle sihirli.
+                        </p>
+
+                        <p>
+                            Gözlerindeki parıltı, dudaklarındaki gülümseme, her şeyin en güzeli sensin.
+                            Ve ben, dünyanın en şanslı insanıyım çünkü sen benim yanımdasın.
+                        </p>
+
+                        <p>
+                            Seni seviyorum. Dün sevdim, bugün seviyorum, yarın da seveceğim.
+                            Her zaman, sonsuza kadar...
+                        </p>
+
+                        <p class="text-right italic mt-8 text-dusty-rose">
+                            Sonsuza dek seninle... 🦋💗
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-10 text-center">
+            <p class="font-serif text-gray-500 text-lg">
+                Seninle sonsuza kadar... 🦋💕
+            </p>
+            <p class="font-serif text-gray-400 text-sm mt-2">
+                Seni çok seviyorum, kelebeğim
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // ===== PASSWORD LOCK SYSTEM =====
+        const lockScreen = document.getElementById('lock-screen');
+        const mainContent = document.getElementById('main-content');
+        const passwordInput = document.getElementById('password-input');
+        const unlockBtn = document.getElementById('unlock-btn');
+        const errorMessage = document.getElementById('error-message');
+        const correctPassword = 'kelebek';
+
+        function checkPassword() {
+            const enteredPassword = passwordInput.value.toLowerCase().trim();
+
+            if (enteredPassword === correctPassword) {
+                // Correct password - unlock the site
+                lockScreen.classList.add('hidden');
+                mainContent.classList.add('visible');
+                document.body.style.overflow = 'auto';
+
+                // Trigger butterfly burst celebration
+                createButterflyBurst();
+
+                // Small confetti for unlock
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 50,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#FFB6C1', '#C9B8D9', '#FFD700']
+                    });
+                }, 300);
+            } else {
+                // Wrong password
+                passwordInput.classList.add('error');
+                errorMessage.classList.add('show');
+
+                setTimeout(() => {
+                    passwordInput.classList.remove('error');
+                    errorMessage.classList.remove('show');
+                }, 2000);
+            }
+        }
+
+        unlockBtn.addEventListener('click', checkPassword);
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // Initially hide scroll on body
+        document.body.style.overflow = 'hidden';
+
+        // Butterfly burst animation on unlock
+        function createButterflyBurst() {
+            const container = document.getElementById('butterfly-container');
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const butterfly = document.createElement('div');
+                    butterfly.textContent = '🦋';
+                    butterfly.style.cssText = `
+                        position: fixed;
+                        left: ${Math.random() * 100}%;
+                        top: 50%;
+                        font-size: ${1 + Math.random() * 1.5}rem;
+                        pointer-events: none;
+                        z-index: 1000;
+                        animation: butterflyBurst ${3 + Math.random() * 2}s ease-out forwards;
+                    `;
+                    container.appendChild(butterfly);
+
+                    setTimeout(() => butterfly.remove(), 5000);
+                }, i * 100);
+            }
+        }
+
+        // Add butterfly burst keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes butterflyBurst {
+                0% {
+                    transform: scale(0) rotate(0deg);
+                    opacity: 0;
+                }
+                20% {
+                    opacity: 1;
+                    transform: scale(1) rotate(${Math.random() * 360}deg);
+                }
+                100% {
+                    transform: translateY(-100vh) translateX(${-100 + Math.random() * 200}px) rotate(${Math.random() * 720}deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Register GSAP ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // ===== HERO ANIMATIONS =====
+        window.addEventListener('load', () => {
+            // Hero animations on load (only when unlocked)
+            const animateHero = () => {
+                gsap.to('#hero-heart', {
+                    opacity: 1,
+                    scale: 1,
+                    duration: 1,
+                    ease: 'back.out(1.7)'
+                });
+
+                gsap.to('#hero-title', {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    delay: 0.5,
+                    ease: 'power3.out'
+                });
+
+                gsap.to('#hero-subtitle', {
+                    opacity: 1,
+                    duration: 1,
+                    delay: 1,
+                    ease: 'power3.out'
+                });
+
+                gsap.to('#scroll-arrow', {
+                    opacity: 1,
+                    duration: 1,
+                    delay: 1.5,
+                    ease: 'power3.out'
+                });
+            };
+
+            // Watch for unlock
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.target.classList.contains('visible')) {
+                        animateHero();
+                        observer.disconnect();
+                    }
+                });
+            });
+
+            observer.observe(mainContent, { attributes: true, attributeFilter: ['class'] });
+        });
+
+        // ===== COUNTER SECTION =====
+        gsap.to('#counter-card', {
+            scrollTrigger: {
+                trigger: '#counter-section',
+                start: 'top 80%',
+            },
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: 'power3.out'
+        });
+
+        // ===== LOVE NOTES ANIMATIONS =====
+        gsap.utils.toArray('.love-note-item').forEach((item, index) => {
+            gsap.fromTo(item,
+                { opacity: 0, y: 50 },
+                {
+                    scrollTrigger: {
+                        trigger: item,
+                        start: 'top 85%',
+                    },
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    delay: 0.1,
+                    ease: 'power3.out'
+                }
+            );
+        });
+
+        // ===== GALLERY ANIMATIONS =====
+        gsap.to('#gallery-title', {
+            scrollTrigger: {
+                trigger: '#gallery-section',
+                start: 'top 80%',
+            },
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: 'power3.out'
+        });
+
+        gsap.to('#gallery-divider', {
+            scrollTrigger: {
+                trigger: '#gallery-section',
+                start: 'top 80%',
+            },
+            opacity: 1,
+            scaleX: 1,
+            duration: 1,
+            delay: 0.2,
+            ease: 'power3.out'
+        });
+
+        // Photo animations with stagger
+        gsap.utils.toArray('.gallery-item').forEach((item, index) => {
+            gsap.to(item, {
+                scrollTrigger: {
+                    trigger: item,
+                    start: 'top 85%',
+                },
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 0.8,
+                delay: index * 0.15,
+                ease: 'back.out(1.2)'
+            });
+        });
+
+        // ===== LETTER ANIMATION =====
+        gsap.fromTo('#letter-container',
+            { opacity: 0, y: 80 },
+            {
+                scrollTrigger: {
+                    trigger: '#letter-section',
+                    start: 'top 80%',
+                },
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                ease: 'power3.out'
+            }
+        );
+
+        // ===== CONFETTI ON GALLERY =====
+        let confettiTriggered = false;
+
+        ScrollTrigger.create({
+            trigger: '#gallery-section',
+            start: 'top 60%',
+            onEnter: () => {
+                if (!confettiTriggered) {
+                    confettiTriggered = true;
+                    launchConfetti();
+                }
+            }
+        });
+
+        function launchConfetti() {
+            // Multiple confetti bursts
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function () {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+
+                // Launch from both sides
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+                    colors: ['#FFB6C1', '#FFD700', '#C9B8D9', '#FF69B4', '#FFC0CB']
+                });
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+                    colors: ['#FFB6C1', '#FFD700', '#C9B8D9', '#FF69B4', '#FFC0CB']
+                });
+            }, 250);
+
+            // Heart shaped confetti
+            setTimeout(() => {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    shapes: ['circle'],
+                    colors: ['#FF69B4', '#FFB6C1', '#FF1493', '#FFC0CB']
+                });
+            }, 500);
+        }
+
+        // ===== DYNAMIC COUNTER =====
+        const startDate = new Date('2023-06-21T00:00:00');
+
+        function updateCounter() {
+            const now = new Date();
+            let diff = now - startDate;
+
+            // Calculate years
+            const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+            diff -= years * (1000 * 60 * 60 * 24 * 365);
+
+            // Calculate months (approximate)
+            const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
+            diff -= months * (1000 * 60 * 60 * 24 * 30);
+
+            // Calculate days
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            diff -= days * (1000 * 60 * 60 * 24);
+
+            // Calculate hours
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            diff -= hours * (1000 * 60 * 60);
+
+            // Calculate minutes
+            const minutes = Math.floor(diff / (1000 * 60));
+            diff -= minutes * (1000 * 60);
+
+            // Calculate seconds
+            const seconds = Math.floor(diff / 1000);
+
+            // Update DOM
+            document.getElementById('years').textContent = years;
+            document.getElementById('months').textContent = months;
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+        }
+
+        // Update counter every second
+        updateCounter();
+        setInterval(updateCounter, 1000);
+
+        // ===== FLOATING HEARTS ON SCROLL =====
+        let lastScrollY = 0;
+        const heartsContainer = document.getElementById('hearts-container');
+        const heartEmojis = ['💕', '💗', '💖', '💝', '💓', '🦋', '✨', '🌸'];
+
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+            heart.style.left = Math.random() * window.innerWidth + 'px';
+            heart.style.top = window.scrollY + window.innerHeight * 0.7 + 'px';
+
+            heartsContainer.appendChild(heart);
+
+            // Remove after animation
+            setTimeout(() => {
+                heart.remove();
+            }, 4000);
+        }
+
+        // Create hearts on scroll
+        let scrollHeartThrottle = 0;
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+
+            // Only create hearts when scrolling down and with throttling
+            if (currentScrollY > lastScrollY && Date.now() - scrollHeartThrottle > 150) {
+                if (Math.random() > 0.5) { // 50% chance
+                    createFloatingHeart();
+                }
+                scrollHeartThrottle = Date.now();
+            }
+
+            lastScrollY = currentScrollY;
+        });
+
+        // ===== SPARKLE EFFECT ON MOUSEMOVE =====
+        let sparkleThrottle = 0;
+        document.addEventListener('mousemove', (e) => {
+            if (Date.now() - sparkleThrottle > 100 && Math.random() > 0.7) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = e.clientX + 'px';
+                sparkle.style.top = e.clientY + 'px';
+                document.body.appendChild(sparkle);
+
+                setTimeout(() => sparkle.remove(), 2000);
+                sparkleThrottle = Date.now();
+            }
+        });
+
+        // ===== INITIAL SETUP =====
+        // Set initial states for animated elements
+        gsap.set('#hero-heart', { scale: 0.5 });
+        gsap.set('#hero-title', { y: 30 });
+        gsap.set('#counter-card', { y: 30 });
+        gsap.set('#gallery-title', { y: 30 });
+        gsap.set('#gallery-divider', { scaleX: 0 });
+        gsap.set('.gallery-item', { y: 30, scale: 0.95 });
+    </script>
+</body>
+
+</html>
